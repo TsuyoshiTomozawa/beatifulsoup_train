@@ -35,8 +35,8 @@ def get_archievement(url):
     datas = {}
     datas['pre_race'] = archievement[14].string
     datas['corner_position'] = corner_position
-    data['popular'] = archievement[10].string
-    data['rank'] = archievement[11].string
+    datas['popular'] = archievement[10].string
+    datas['rank'] = archievement[11].string
     return datas
 
 
@@ -58,7 +58,7 @@ def get_fathers_list():
     return datas
 
 
-url = "https://race.netkeiba.com/?pid=race_old&id=c201905030512&mode=top"
+url = "https://race.netkeiba.com/?pid=race_old&id=c201905030510&mode=top"
 soup = url_to_soup(url)
 
 # 父　血統データ取得
@@ -77,9 +77,15 @@ for data in datas:
     
     # 最新レース戦績
     archievement_last = get_archievement(link)
-    # 距離比較
     pre_range = archievement_last['pre_race'][1:5]
     corner_pos = archievement_last['corner_position']
+    rank = int(archievement_last['rank'])
+    popular = int(archievement_last['popular'])
+
+    #差して凡走
+    general_run_flg = False
+    if int(corner_pos.split('-')[-2]) >= 5 and rank > 3:
+        general_run_flg = True
 
     if pre_range < range:
         range_comparison = "延長"
@@ -88,7 +94,7 @@ for data in datas:
     elif pre_range == range:
         range_comparison = "同距離"
 
-    result[data['horsename']] = {"range_comparison":range_comparison,'corner_position': corner_pos.split('-')[-2]}
+    result[data['horsename']] = {"range_comparison":range_comparison, 'corner_position': corner_pos.split('-')[-2], "general_run_flg":general_run_flg}
 
     '''
     father = get_father(link).get('title')
@@ -109,7 +115,7 @@ for data in datas:
     
 
 for horsename, value in result.items():
-    if value['range_comparison'] == "短縮" and int(value['corner_position']) <= 5:
+    if value['range_comparison'] == "短縮" and int(value['corner_position']) >= 5 and value['general_run_flg']:
         print(horsename)
 
 
