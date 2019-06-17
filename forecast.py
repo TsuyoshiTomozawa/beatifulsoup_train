@@ -108,7 +108,6 @@ for data in datas:
     '''
     
 
-print("短縮ショッカー馬")
 for horsename, value in result.items():
     if value['range_comparison'] == "短縮" and int(value['corner_position']) <= 5:
         print(horsename)
