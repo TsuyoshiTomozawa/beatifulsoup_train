@@ -30,13 +30,34 @@ def get_horse_data(soup):
 def get_archievement(url):
     soup = url_to_soup(url)
     
-    archievement = soup.find(class_="db_h_race_results").find('tbody').find('tr').find_all("td")
+    archievements = soup.find(class_="db_h_race_results").find('tbody').find_all('tr')
+    #print(archievements)
+    #exit()
+    archievement = archievements[0].find_all("td")
     corner_position = archievement[20].string
     datas = {}
     datas['pre_race'] = archievement[14].string
     datas['corner_position'] = corner_position
     datas['popular'] = archievement[10].string
     datas['rank'] = archievement[11].string
+    
+    archievements.pop(0)
+    
+    preceding_flag = False
+    for result in archievements:
+        archievement = result.find_all("td")
+        #先行
+        corner_position  = archievement[20].string.split('-')[0]
+        rank = archievement[11].string
+
+        if rank.isnumeric() == False or corner_position.isnumeric() == False:
+            continue;
+        if int(corner_position) < 5 and int(rank) <= 3:
+            preceding_flag = True
+            break
+
+    datas['preceding_flag'] = preceding_flag
+
     return datas
 
 
@@ -58,7 +79,7 @@ def get_fathers_list():
     return datas
 
 
-url = "https://race.netkeiba.com/?pid=race_old&id=c201905030510&mode=top"
+url = "https://race.netkeiba.com/?pid=race_old&id=c201905030511&mode=top"
 soup = url_to_soup(url)
 
 # 父　血統データ取得
@@ -79,12 +100,15 @@ for data in datas:
     archievement_last = get_archievement(link)
     pre_range = archievement_last['pre_race'][1:5]
     corner_pos = archievement_last['corner_position']
-    rank = int(archievement_last['rank'])
-    popular = int(archievement_last['popular'])
+    rank = archievement_last['rank']
+    popular = archievement_last['popular']
+
+    if rank.isnumeric() == False or popular.isnumeric() == False:
+        continue;
 
     #差して凡走
     general_run_flg = False
-    if int(corner_pos.split('-')[-2]) >= 5 and rank > 3:
+    if int(corner_pos.split('-')[-2]) >= 5 and int(rank) > 3:
         general_run_flg = True
 
     if pre_range < range:
@@ -113,7 +137,8 @@ for data in datas:
         exit()
     '''
     
-
+#print(result)
+#exit()
 for horsename, value in result.items():
     if value['range_comparison'] == "短縮" and int(value['corner_position']) >= 5 and value['general_run_flg']:
         print(horsename)
