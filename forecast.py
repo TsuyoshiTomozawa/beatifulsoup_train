@@ -28,6 +28,9 @@ def get_horse_data(soup):
 
     return datas
 def get_archievement(url):
+    """
+    過去の戦績データ取得
+    """
     soup = url_to_soup(url)
     
     archievements = soup.find(class_="db_h_race_results").find('tbody').find_all('tr')
@@ -44,6 +47,7 @@ def get_archievement(url):
     archievements.pop(0)
     
     preceding_flag = False
+    cnt = 0
     for result in archievements:
         archievement = result.find_all("td")
         #先行
@@ -55,6 +59,7 @@ def get_archievement(url):
         if int(corner_position) < 5 and int(rank) <= 3:
             preceding_flag = True
             break
+        cnt += 1
 
     datas['preceding_flag'] = preceding_flag
 
@@ -88,6 +93,8 @@ fathers_list = get_fathers_list()
 # レース情報取得
 race_data = get_race_data(soup)
 race = race_data.find(class_="racedata").find('p').string
+race_other_data = race_data.find(class_="race_otherdata").find("p").string
+today = race_other_data[0:10]
 race_type = race[0]
 range = race[1:5]
 
