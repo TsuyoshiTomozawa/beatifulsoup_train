@@ -38,18 +38,22 @@ def get_archievement(url):
     #exit()
     archievement = archievements[0].find_all("td")
     corner_position = archievement[20].string
+
     datas = {}
-    datas['pre_race'] = archievement[14].string
-    datas['corner_position'] = corner_position
-    datas['popular'] = archievement[10].string
-    datas['rank'] = archievement[11].string
-    
-    archievements.pop(0)
-    
     preceding_flag = False
     cnt = 0
     for result in archievements:
         archievement = result.find_all("td")
+        day = archievement[0].string
+        if day == today:
+            continue;
+
+        if cnt == 0:
+            datas['pre_race'] = archievement[14].string
+            datas['corner_position'] = corner_position
+            datas['popular'] = archievement[10].string
+            datas['rank'] = archievement[11].string
+
         #先行
         corner_position  = archievement[20].string.split('-')[0]
         rank = archievement[11].string
@@ -84,7 +88,7 @@ def get_fathers_list():
     return datas
 
 
-url = "https://race.netkeiba.com/?pid=race_old&id=c201905030511&mode=top"
+url = "https://race.netkeiba.com/?pid=race_old&id=c201905030507&mode=top"
 soup = url_to_soup(url)
 
 # 父　血統データ取得
@@ -115,8 +119,16 @@ for data in datas:
 
     #差して凡走
     general_run_flg = False
-    if int(corner_pos.split('-')[-2]) >= 5 and int(rank) > 3:
-        general_run_flg = True
+    try:
+        if corner_pos.split('-')[-2]:
+            pos = corner_pos.split('-')[-2]
+        else:
+            pos = corner_pos.split('-')[-1]
+
+        if int(pos) >= 5 and int(rank) > 3:
+            general_run_flg = True
+    except:
+        continue;
 
     if pre_range < range:
         range_comparison = "延長"
